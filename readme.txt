@@ -1,10 +1,10 @@
 === Last.fm Post Extension ===
-Contributors: Steffen G�rtz
+Contributors: Steffen Görtz
 Donate link: http://www.steffen-goertz.de/2008/04/18/lastfm-post-extension/
 Tags: post, last.fm, track, music
 Requires at least: 2.5.0
 Tested up to: 2.5
-Stable tag: 1.0
+Stable tag: 1.1
 
 This Plugin automagically adds the last scrobbled Song to your published Post.
 
@@ -26,17 +26,18 @@ which is only included in PHP5. But PHP4 is obsolete anyway, so this is a good o
 
 == Installation ==
 
- 1. Unpack the Archive and edit lastfmpostext.css ( Exchange my URL with Yours )
- 2. Upload everything to wp-content/plugins/lastfmpostext/
- 3. Log in and activate the Last.fm Post Extension in your Admin Panel -> Plugins
- 4. You will see a new Submenu Item in your Plugin Admin Panel
- 5. Go there and enter your Last.fm Username and the desired Link Design
- 6. Go to the Design Section of Wordpress Backend -> Theme Editor -> index.php
- 7. Call <?=the_music()?> whereever you want. I suggest you do it either directly under the header or in the meta box of the post (look at integration.png)
- 8. Do the same in single.php und archiv.php
- 9. Write a new Post and leave me a Comment how you feel with your new Toys :-)
+ * Unpack the Archive and edit lastfmpostext.css ( Exchange my URL with Yours )
+ * Upload everything to wp-content/plugins/lastfmpostext/
+ * Log in and activate the Last.fm Post Extension in your Admin Panel -> Plugins
+ * You will see a new Submenu Item in your Plugin Admin Panel
+ * Go there and enter your Last.fm Username and the desired Link Design
+ * Go to the Design Section of Wordpress Backend -> Theme Editor -> index.php
+ * Call <?=the_music()?> whereever you want. I suggest you do it either directly under the header or in the meta box of the post (look at screenshot-2.png)
+ * Do the same in single.php und archiv.php
+ * Write a new Post and leave me a Comment how you feel with your new Toys :-)
 
 == Screenshots ==
 
-1. integration.png - This way you can integrate the_music() into your template
-
+1. This is what the output of the plugin may look like. You are free to design the output yourself
+2. This is how you integrate the song output to your single/index/archiv file
+3. The Backend

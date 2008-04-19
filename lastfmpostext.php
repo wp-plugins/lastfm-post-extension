@@ -1,14 +1,14 @@
 <?php
 /*
 Plugin Name: Last.fm Post Extension
-Plugin URI: http://www.steffen-goertz.de/#
+Plugin URI: http://www.steffen-goertz.de/2008/04/18/lastfm-post-extension/
 Description: Enhance your Post with your currently played track
 Author: Steffen Görtz
 Version: 1.0
-Author URI: http://www.steffen-goertz.de/#
+Author URI: http://www.steffen-goertz.de/
 */
 
-/*  Copyright 2008  Steffen Görtz  (email : ed.ztreog-neffets ta neffets (no spam mirrored)
+/*  Copyright 2008  Steffen Görtz  (email : ed.ztreog-neffets ta neffets (mirror-inverted)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -78,60 +78,87 @@ function lastfmPostExt_config_page() {
 
 function lastfmPostExt_settings() {
 ?>
-<form method="post" action="options.php">
-<?php wp_nonce_field('update-options'); ?>
-<p class="submit">
-<input type="submit" name="Submit" value="<?php _e('Update Options »') ?>" />
-</p>
+<div class="wrap">
+	<h2><?=__('Last.fm Post Extension Configuration','lastfmPostExt')?></h2>
+	<div class="narrow">
+		<form method="post" id="lastfmPostExtConf" style="margin: auto; width: 400px;" action="options.php">
+		<?php wp_nonce_field('update-options'); ?>
 
-<div>
-<h3><?=__('Your Last.fm Username', 'lastfmPostExt')?></h3>
-	<input type="text" name="lastfmPostExt_username" value="<?php echo get_option('lastfmPostExt_username'); ?>" />
+		<h3><?=__('Your Last.fm Username', 'lastfmPostExt')?></h3>
+		<input type="text" name="lastfmPostExt_username" value="<?php echo get_option('lastfmPostExt_username'); ?>" />
+<?php
+	$xml = @simplexml_load_file('http://ws.audioscrobbler.com/1.0/user/'.get_option('lastfmPostExt_username').'/recenttracks.xml');
+	if($xml) {
+		$status = __('Last.fm Service available for','lastfmPostExt');
+		$background = '#22DD22';
+	} else {
+		$status = __('Last.fm Service unavailable for','lastfmPostExt');
+		$background = '#DD2222';
+	}
+?>
+	<p style="padding: 0.5em; background-color: <?=$background?>; color: rgb(255, 255, 255); font-weight: bold;">
+		<?=$status.' '.get_option('lastfmPostExt_username')?>
+	</p>
+	
+		<h3><?=__('Timeout in Seconds', 'lastfmPostExt')?></h3>
+		<p>How many Seconds after Scrobbling is a Song still "currently played" ? <br/> 
+			The Problem is Last.fm doesnt provide Track Length via their API. So we have to guess</p>
+		<input type="text" name="lastfmPostExt_timeout" value="<?php echo get_option('lastfmPostExt_timeout'); ?>" />
+
+		<h3><?=__('Format String','lastfmPostExt')?></h3>
+		<strong>Available Wild-Cards:</strong>
+		<ul>
+			<li>%artist - The Artists Name</li>
+			<li>%album - Album Name</li>
+			<li>%track - Track Name</li>
+		</ul>
+		<input type="text" name="lastfmPostExt_format" value="<?php echo get_option('lastfmPostExt_format'); ?>" />
+
+		<input type="hidden" name="action" value="update" />
+		<input type="hidden" name="page_options" value="lastfmPostExt_username,lastfmPostExt_format,lastfmPostExt_timeout" />
+		<p class="submit">
+			<input type="submit" name="Submit" value="<?php _e('Update Options »') ?>" />
+		</p>
+		</form>
+	</div>
 </div>
-
-<div>
-<h3><?=__('Timeout in Seconds', 'lastfmPostExt')?></h3>
-<p>How many Seconds after Scrobbling is a Song still "currently played" ? <br/> 
-The Problem is Last.fm doesnt provide Track Length via their API. So we have to guess</p>
-	<input type="text" name="lastfmPostExt_timeout" value="<?php echo get_option('lastfmPostExt_timeout'); ?>" />
-</div>
-
-<div>
-<h3><?=__('Format String','lastfmPostExt')?></h3>
-	<strong>Available Wild-Cards:</strong>
-	<ul>
-		<li>%artist - The Artists Name</li>
-		<li>%album - Album Name</li>
-		<li>%track - Track Name</li>
-	</ul>
-	<input type="text" name="lastfmPostExt_format" value="<?php echo get_option('lastfmPostExt_format'); ?>" />
-</div>
-
-<input type="hidden" name="action" value="update" />
-<input type="hidden" name="page_options" value="lastfmPostExt_username,lastfmPostExt_format,lastfmPostExt_timeout" />
-<p class="submit">
-<input type="submit" name="Submit" value="<?php _e('Update Options »') ?>" />
-</p>
-</form>
 <?php
 }
 
 function lastfmPostExt_populate($postID) {
 	$xml = @simplexml_load_file('http://ws.audioscrobbler.com/1.0/user/'.get_option('lastfmPostExt_username').'/recenttracks.xml');
-	
+
 	if(!$xml) 
 		return $postID;
+	
+	$xml = $xml->track[0];	
 	
 	# I would rather serialize the $xml->track[0] Node directly, but SimpleXML does not allow direct
 	# serialization .. hmpf
 	$info = array(
-		'artist' => (string)$xml->track[0]->artist,
-		'streamable' => ((string)$xml->track[0]['streamable'] == "true") ? true : false,
-		'album' => (string)$xml->track[0]->album,
-		'track' => (string)$xml->track[0]->name,
-		'url' => (string)$xml->track[0]->url,
-		'date' => (string)$xml->track[0]->date['uts']
+		'artist' => (string)$xml->artist,
+		'streamable' => ((string)$xml['streamable'] == "true") ? true : false,
+		'album' => (string)$xml->album,
+		'track' => (string)$xml->name,
+		'url' => (string)$xml->url,
+		'date' => (string)$xml->date['uts']
 	);
+	
+	$duration = false;
+	
+	/**
+	# Checking for additionaly Information via MusicBrainz
+	$mbid = array(
+		'track' => (string)$xml->mbid,
+		'artist' => (string)$xml->artist['mbid'],
+		'album' => (string)$xml->album['mbid']
+	);
+
+	# Checking if Track available
+	if($mbid['track']) {
+		$trackData = @simplexml_load_file('http://musicbrainz.org/ws/1/track/' . $mbid['track']);
+	}
+	**/
 	
 	# Lastfm doesnt give any Info how long a track is,
 	# so i have to guess - longer than is no normal average song
