@@ -1,0 +1,16 @@
+@CHARSET "UTF-8";
+
+span.lastfmpostext {
+	color: #666;
+}
+
+span.lastfmpostext a {
+	padding-left: 16px;
+	background-repeat: no-repeat;
+	background-image: url(http://www.steffen-goertz.de/wp-content/plugins/lastfmpostext/preview.gif);
+}
+
+span.lastfmpostext.streamable a {
+	background-image: url(http://www.steffen-goertz.de/wp-content/plugins/lastfmpostext/full.gif);
+}
+
