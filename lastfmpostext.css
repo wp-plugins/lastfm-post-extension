@@ -7,10 +7,10 @@ span.lastfmpostext {
 span.lastfmpostext a {
 	padding-left: 16px;
 	background-repeat: no-repeat;
-	background-image: url(http://www.steffen-goertz.de/wp-content/plugins/lastfmpostext/preview.gif);
+	background-image: url(http://www.steffen-goertz.de/wp-content/plugins/lastfm-post-extension/preview.gif);
 }
 
 span.lastfmpostext.streamable a {
-	background-image: url(http://www.steffen-goertz.de/wp-content/plugins/lastfmpostext/full.gif);
+	background-image: url(http://www.steffen-goertz.de/wp-content/plugins/lastfm-post-extension/full.gif);
 }
 

@@ -4,7 +4,7 @@ Plugin Name: Last.fm Post Extension
 Plugin URI: http://www.steffen-goertz.de/2008/04/18/lastfm-post-extension/
 Description: Enhance your Post with your currently played track
 Author: Steffen Görtz
-Version: 1.0
+Version: 1.2
 Author URI: http://www.steffen-goertz.de/
 */
 
@@ -101,8 +101,17 @@ function lastfmPostExt_settings() {
 	</p>
 	
 		<h3><?=__('Timeout in Seconds', 'lastfmPostExt')?></h3>
-		<p>How many Seconds after Scrobbling is a Song still "currently played" ? <br/> 
-			The Problem is Last.fm doesnt provide Track Length via their API. So we have to guess</p>
+		<p>When a Song is scrobbled, the point in time is saved. 
+		To determine when a Song is "old" we try to get information about the duration of the last played song via 
+		the <a href="http://www.musicbrainz.org">MusicBrainz.org-Database</a>. The "Lifetime", so how long a song
+		is considered as "currently played" is calculated by</p>
+		<p style="padding: 5px 0 5px 15px;">
+			Now - ( Time of Scrobbling  + (opt.) Duration )
+		</p>
+		<p>When this <strong>smaller</strong> then <strong>Timeout</strong> (this field!), a Song is <i>currently played</i></p>
+		<p>You will have to play around with this value. A high value (10 - 20 mins) is needed if no duration info is available for your songs 
+		or audioscrobbler is lame. A small value ( 5 mins) can be used when audioscrobbler is fast and all your songs have duration info.
+		</p>
 		<input type="text" name="lastfmPostExt_timeout" value="<?php echo get_option('lastfmPostExt_timeout'); ?>" />
 
 		<h3><?=__('Format String','lastfmPostExt')?></h3>
@@ -141,33 +150,87 @@ function lastfmPostExt_populate($postID) {
 		'album' => (string)$xml->album,
 		'track' => (string)$xml->name,
 		'url' => (string)$xml->url,
-		'date' => (string)$xml->date['uts']
+		'date' => (integer)$xml->date['uts']
 	);
 	
-	$duration = false;
-	
-	/**
 	# Checking for additionaly Information via MusicBrainz
 	$mbid = array(
 		'track' => (string)$xml->mbid,
 		'artist' => (string)$xml->artist['mbid'],
 		'album' => (string)$xml->album['mbid']
 	);
-
-	# Checking if Track available
-	if($mbid['track']) {
-		$trackData = @simplexml_load_file('http://musicbrainz.org/ws/1/track/' . $mbid['track']);
-	}
-	**/
+	
+	if($mbid['track'])
+		$info['duration'] = lastfmPostExt_infoTrackHelper($mbid['track']);
+	else
+		$info['duration'] = lastfmPostExt_infoDurationHelper($mbid, $info);
 	
 	# Lastfm doesnt give any Info how long a track is,
 	# so i have to guess - longer than is no normal average song
 	# sorry dear electro and chillout listener
-	if( (time() - $info['date']) < (integer)get_option('lastfmPostExt_timeout') ) {
+	
+	if( (time() - ($info['date'] + ($info['duration']/1000) ) ) < (integer)get_option('lastfmPostExt_timeout') ) {
 		add_post_meta($postID, '_lastfmPostExtMusic', serialize($info));
 	}
 	
 	return $postID;
 }
 add_action('publish_post', 'lastfmPostExt_populate');
+
+function lastfmPostExt_infoTrackHelper($mbid) {
+	$duration = 0;
+	
+	$trackData = @simplexml_load_file('http://musicbrainz.org/ws/1/track/' . $mbid . '?type=xml&inc=duration');
+	if($trackData) {
+		$duration = (integer)((string)$trackData->track[0]->duration);
+	}
+	
+	return $duration;
+}
+
+
+function lastfmPostExt_infoDurationHelper($mbid, $info) {
+	$duration = 0;
+	
+	$searchString = '&title=' . urlencode($info['track']);
+	
+	# Album Info
+	if( $mbid['album'] ) {
+		$searchString .= '&releaseid=' . $mbid['album'];
+	} else if( $info['album'] ) {
+		$searchString .= '&release=' . urlencode($info['album']);
+	}
+	
+	# Artist
+	if( $mbid['artist'] ) {
+		$searchString .= '&artistid=' . $mbid['artist'];
+	} else if( $info['artist'] ) {
+		$searchString .= '&artist=' . urlencode($info['artist']);
+	}
+	
+	$artistData = @simplexml_load_file('http://musicbrainz.org/ws/1/track/?type=xml' . $searchString);
+	
+	if($artistData) {
+		if($artistData->{"track-list"} && ( (integer)$artistData->{"track-list"}['count'] != 0 ) ) {
+			$count = 0;
+			
+			foreach ($artistData->{"track-list"}->track as $track) {
+				if($track->duration) {
+					$duration += (integer)$track->duration;
+					$count++;
+			
+					if($count == 10) 
+						break;
+				}
+			}
+			$duration /= $count;
+		}
+	}
+	
+	return $duration;
+}
+
+function lastfmPostExt_log($msg) {
+	file_put_contents('../wp-content/plugins/lastfm-post-extension/log.txt',$msg ."\r\n", FILE_APPEND);
+}
 ?>
