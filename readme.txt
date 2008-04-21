@@ -4,7 +4,7 @@ Donate link: http://www.steffen-goertz.de/2008/04/18/lastfm-post-extension/
 Tags: post, last.fm, track, music
 Requires at least: 2.5.0
 Tested up to: 2.5
-Stable tag: 1.2
+Stable tag: 1.2.1
 
 This Plugin automagically adds the last scrobbled Song to your published Post.
 
@@ -15,9 +15,10 @@ Via the Tagfunction `the_music()` you can show the formated song information on 
 No Last.fm Password is needed, only your Username.
 
 == Individualisation ==
- * Setting up the Format String in Last.Fm Post Extensions Options Page (Admin -> Plugins)
- * Editing `lastfmpostext.css`
- * Edit the $output Var in `lastfmpostext.php` `the_music()`
+There a three possibilitys to change `Last.fm Post Extension` public Appearance:
+* Setting up the Format String in Last.Fm Post Extensions Options Page (Admin -> Plugins)
+* Editing `lastfmpostext.css`
+* Edit the $output Var in `lastfmpostext.php` `the_music()`
  
 == Requirements ==
 
@@ -25,15 +26,13 @@ Unfortunaly i'm a lazy guy. So there is no PHP4 support since it uses the Simple
 which is only included in PHP5. But PHP4 is obsolete anyway, so this is a good opportunity to get rid of it.
 
 == Installation ==
- 1. Unpack the Archive and edit lastfmpostext.css ( Exchange my URL with Yours )
- 1. Upload everything to wp-content/plugins/lastfmpostext/
- 1. Log in and activate the Last.fm Post Extension in your Admin Panel -> Plugins
- 1. You will see a new Submenu Item in your Plugin Admin Panel
- 1. Go there and enter your Last.fm Username and the desired Link Design
- 1. Go to the Design Section of Wordpress Backend -> Theme Editor -> `index.php`
- 1. Call `<?=the_music()?>` whereever you want. I suggest you do it either directly under the header or in the meta box of the post (look at screenshot-2.png)
- 1. Do the same in `single.php` and `archiv.php`
- 1. Write a new Post and leave me a Comment how you feel with your new Toys :-)
+1. Upload the Folder `lastfm-post-extension` to your `\wp-content\plugins\` Folder
+1. LogIn and active the Plugin in Wordpress 'Plugin' Menu
+1. Setup Last.fm Username, Timeout and Link Layout in `Last.fm Post Ext` Options Page
+1. Go to the Design Section of Wordpress Backend -> Theme Editor -> `index.php`
+1. Place `<?=the_music()?>` somewhere. I suggest you do it either directly under the header or in the meta box of the post (look at screenshot-2.png)
+1. Do the same in `single.php` and `archiv.php`
+1. Happy Posting. You might leave me a short comment under the donatation url.
 
 == Screenshots ==
 

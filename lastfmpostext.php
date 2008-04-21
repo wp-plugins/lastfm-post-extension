@@ -4,7 +4,7 @@ Plugin Name: Last.fm Post Extension
 Plugin URI: http://www.steffen-goertz.de/2008/04/18/lastfm-post-extension/
 Description: Enhance your Post with your currently played track
 Author: Steffen Görtz
-Version: 1.2
+Version: 1.2.1
 Author URI: http://www.steffen-goertz.de/
 */
 
@@ -49,7 +49,7 @@ function the_music() {
 }
 
 function lastfmPostExt_css_link() {
-	echo '<link href="'.get_option('siteurl').'/wp-content/plugins/lastfmpostext/lastfmpostext.css" type="text/css" rel="stylesheet"/>';
+	echo '<link href="'.get_option('siteurl').'/wp-content/plugins/lastfm-post-extension/lastfmpostext.css" type="text/css" rel="stylesheet"/>';
 }
 add_action('wp_head','lastfmPostExt_css_link');
 
@@ -187,7 +187,6 @@ function lastfmPostExt_infoTrackHelper($mbid) {
 	
 	return $duration;
 }
-
 
 function lastfmPostExt_infoDurationHelper($mbid, $info) {
 	$duration = 0;
