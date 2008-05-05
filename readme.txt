@@ -4,7 +4,7 @@ Donate link: http://www.steffen-goertz.de/2008/04/18/lastfm-post-extension/
 Tags: post, last.fm, track, music
 Requires at least: 2.5.0
 Tested up to: 2.5
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 
 This Plugin automagically adds the last scrobbled Song to your published Post.
 

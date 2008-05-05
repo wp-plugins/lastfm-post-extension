@@ -4,7 +4,7 @@ Plugin Name: Last.fm Post Extension
 Plugin URI: http://www.steffen-goertz.de/2008/04/18/lastfm-post-extension/
 Description: Enhance your Post with your currently played track
 Author: Steffen Görtz
-Version: 1.2.1
+Version: 1.2.2
 Author URI: http://www.steffen-goertz.de/
 */
 
@@ -83,17 +83,26 @@ function lastfmPostExt_settings() {
 	<div class="narrow">
 		<form method="post" id="lastfmPostExtConf" style="margin: auto; width: 400px;" action="options.php">
 		<?php wp_nonce_field('update-options'); ?>
-
+		<p class="submit" style="border: 0;">
+			<input type="submit" name="Submit" value="<?php _e('Update Options »') ?>" />
+		</p>
 		<h3><?=__('Your Last.fm Username', 'lastfmPostExt')?></h3>
 		<input type="text" name="lastfmPostExt_username" value="<?php echo get_option('lastfmPostExt_username'); ?>" />
 <?php
-	$xml = @simplexml_load_file('http://ws.audioscrobbler.com/1.0/user/'.get_option('lastfmPostExt_username').'/recenttracks.xml');
-	if($xml) {
-		$status = __('Last.fm Service available for','lastfmPostExt');
-		$background = '#22DD22';
+	// Check if Environment is ok
+	$background = '#DD2222';
+	if( !function_exists('simplexml_load_file') ) {
+		$status = __('SimpleXML Extension not available! You must have turned on SimpleXML in your PHP Environment.', 'lastfmPostExt');
+	} elseif( strtolower(ini_get('allow_url_fopen')) == 'off' )  {
+		$status = __('Reading of Remote Files is not allowed! Turn on `allow_url_fopen` in your PHP Configuration.', 'lastfmPostExt');
 	} else {
-		$status = __('Last.fm Service unavailable for','lastfmPostExt');
-		$background = '#DD2222';
+		$xml = @simplexml_load_file('http://ws.audioscrobbler.com/1.0/user/'.get_option('lastfmPostExt_username').'/recenttracks.xml');
+		if(!$xml) {
+			$status = __('Last.fm Service unavailable for', 'lastfmPostExt');
+		} else {
+			$status = __('Last.fm Service available for', 'lastfmPostExt');
+			$background = '#22DD22';;
+		}
 	}
 ?>
 	<p style="padding: 0.5em; background-color: <?=$background?>; color: rgb(255, 255, 255); font-weight: bold;">
